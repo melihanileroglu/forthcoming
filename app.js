@@ -1,8 +1,9 @@
-// app.js (DÜZENLENMİŞ TAM HALİ)
+// app.js (TAM)
 // ✅ Register kaldırıldı
 // ✅ Firestore/cloud save/load tamamen kaldırıldı
 // ✅ layers.json her girişte yükleniyor
 // ✅ Katman görünmeme sorunu: proj4 ile TM30 -> WGS84 dönüşümü eklendi
+// ✅ ⋯ menü (Stil/Öznitelik/Katmana Git) FIX: capture click yüzünden çalışmama sorunu giderildi
 
 import { auth } from "./firebase.js";
 
@@ -249,7 +250,6 @@ function reprojectGeoJSONToWGS84(geojson){
 
 // ================== AUTO SAVE (KALDIRILDI) ==================
 function scheduleAutoSave(reason=""){
-  // Kaydetme tamamen kapalı
   return;
 }
 
@@ -292,13 +292,13 @@ function ensureGroup(name){
   if (!groupOrder.includes(name)) groupOrder.push(name);
 }
 
-/* -------- Global menu -------- */
+/* -------- Global menu (FIXED) -------- */
 const globalMenu = document.createElement("div");
 globalMenu.className = "global-menu hidden";
 globalMenu.innerHTML = `
-  <button data-act="style"><span>🎨 Stil</span><small>çizgi/dolgu</small></button>
-  <button data-act="attr"><span>▦ Öznitelik</span><small>tablo</small></button>
-  <button data-act="zoom"><span>↗ Katmana Git</span><small>zoom</small></button>
+  <button data-act="style" type="button"><span>🎨 Stil</span><small>çizgi/dolgu</small></button>
+  <button data-act="attr" type="button"><span>▦ Öznitelik</span><small>tablo</small></button>
+  <button data-act="zoom" type="button"><span>↗ Katmana Git</span><small>zoom</small></button>
 `;
 document.body.appendChild(globalMenu);
 
@@ -308,13 +308,23 @@ function closeGlobalMenu(){
   globalMenu.classList.add("hidden");
   globalMenuCtx.layerId = null;
 }
-document.addEventListener("click", () => closeGlobalMenu(), true);
-window.addEventListener("resize", () => closeGlobalMenu());
+
+// ✅ menü dışına tıklayınca kapat (menü içi tıklamada kapatma!)
+document.addEventListener("pointerdown", (e) => {
+  if (globalMenu.classList.contains("hidden")) return;
+  const insideMenu = globalMenu.contains(e.target);
+  const clickedMore = e.target.closest?.(".morebtn");
+  if (!insideMenu && !clickedMore) closeGlobalMenu();
+});
+
+window.addEventListener("resize", closeGlobalMenu);
+window.addEventListener("scroll", closeGlobalMenu, true);
 
 globalMenu.addEventListener("click", (e) => {
   e.stopPropagation();
   const btn = e.target.closest("button");
   if (!btn) return;
+
   const act = btn.dataset.act;
   const layerId = globalMenuCtx.layerId;
   if (!layerId || !layerStore[layerId]) return;
@@ -323,9 +333,18 @@ globalMenu.addEventListener("click", (e) => {
   if (act === "attr") openAttributeTable(layerId);
   if (act === "zoom") {
     const item = layerStore[layerId];
-    const b = item.leaflet.getBounds?.();
+
+    // Katman kapalıysa aç
+    if (item?.leaflet && !map.hasLayer(item.leaflet)) {
+      map.addLayer(item.leaflet);
+      const cb = document.querySelector(`input[data-layercheck="${layerId}"]`);
+      if (cb) cb.checked = true;
+    }
+
+    const b = item?.leaflet?.getBounds?.();
     if (b && b.isValid()) map.fitBounds(b, { padding:[20,20] });
   }
+
   closeGlobalMenu();
 });
 
@@ -336,7 +355,8 @@ function openGlobalMenuAt(btnEl, layerId){
   const menuW = 240;
   const menuH = 160;
 
-  let left = Math.min(window.innerWidth - menuW - 10, r.right - menuW);
+  let left = r.right - menuW;
+  left = Math.min(window.innerWidth - menuW - 10, left);
   left = Math.max(10, left);
 
   let top = r.bottom + 8;
@@ -553,8 +573,8 @@ function buildLayerRow(layerId){
     </div>
 
     <div class="layer-right">
-      <button class="editbtn" title="Bu katmana çizim ekle">✏️</button>
-      <button class="morebtn" title="İşlemler">⋯</button>
+      <button class="editbtn" title="Bu katmana çizim ekle" type="button">✏️</button>
+      <button class="morebtn" title="İşlemler" type="button">⋯</button>
     </div>
   `;
 
@@ -720,7 +740,6 @@ async function loadDefaultLayersFromDataFolder(){
       const raw = await res.json();
       let geojson = normalizeGeoJSON(raw);
 
-      // ✅ PROJ dönüşümü
       if (looksProjected(geojson)) {
         geojson = reprojectGeoJSONToWGS84(geojson);
       }
@@ -1436,7 +1455,7 @@ onAuthStateChanged(auth, async (u) => {
 
   try{
     setStatus("Katmanlar yükleniyor...");
-    await loadDefaultLayersFromDataFolder(); // ✅ her zaman layers.json
+    await loadDefaultLayersFromDataFolder();
     setStatus("Varsayılan katmanlar yüklendi ✅");
   }catch(err){
     console.error(err);
