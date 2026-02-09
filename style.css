@@ -1,4 +1,4 @@
-/* style.css (DÜZENLENMİŞ TAM HALİ) - senin CSS'in değişmeden aynen */
+/* style.css (TAM) */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 
@@ -263,7 +263,6 @@ body{
 }
 
 /* Leaflet zoom sağ üst + koyu mavi */
-
 .leaflet-control-zoom{
   border:1px solid var(--line) !important;
   border-radius:12px !important;
@@ -800,3 +799,7 @@ body{
   display:flex;
   gap:8px;
 }
+
+/* küçük iyileştirme (isteğe bağlı) */
+.global-menu button span { display:flex; gap:8px; align-items:center; }
+.global-menu button small { opacity:0.75; }
