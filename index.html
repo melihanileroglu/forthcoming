@@ -1,4 +1,3 @@
-<!-- index.html (TAM) -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -6,15 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CBS Web Haritası</title>
 
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-  <!-- App CSS -->
   <link rel="stylesheet" href="./style.css"/>
 </head>
 <body>
 
-  <!-- AUTH SCREEN -->
   <div id="authScreen" class="auth-screen">
     <div class="auth-cover" style="background-image:url('./data/login-bg.png')"></div>
 
@@ -27,7 +22,6 @@
         </div>
       </div>
 
-      <!-- SADECE LOGIN -->
       <form id="loginForm" class="auth-form">
         <label class="auth-label">E-posta</label>
         <input id="loginEmail" class="auth-input" type="email" placeholder="ornek@mail.com" required />
@@ -47,8 +41,8 @@
     </div>
   </div>
 
-  <!-- APP -->
   <div class="app" id="appRoot" style="display:none;">
+    
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-dot"></div>
@@ -115,6 +109,8 @@
       </div>
     </aside>
 
+    <div id="sidebarToggle" class="sidebar-toggle" title="Paneli Aç/Kapat">◀</div>
+
     <main class="mapwrap">
       <div id="map"></div>
 
@@ -124,7 +120,6 @@
         <button id="toolsBtn" class="iconbtn" title="Araçlar">🧰</button>
       </div>
 
-      <!-- Toolbox -->
       <div id="toolbox" class="toolbox hidden">
         <div class="toolbox-head">
           <div class="toolbox-title">Araçlar</div>
@@ -136,7 +131,6 @@
         </div>
       </div>
 
-      <!-- Style modal -->
       <div id="styleModal" class="modal hidden">
         <div class="modal-card">
           <div class="modal-head">
@@ -146,7 +140,7 @@
             </div>
             <button id="styleClose" class="xbtn" title="Kapat">×</button>
           </div>
-
+          
           <div class="modal-body">
             <div class="formrow">
               <div class="label">Dış çizgi rengi</div>
@@ -198,7 +192,54 @@
         </div>
       </div>
 
-      <!-- Attribute Table Drawer -->
+      <div id="addFieldModal" class="modal hidden">
+        <div class="modal-card">
+          <div class="modal-head">
+            <div>
+              <div class="modal-title">Yeni Kolon Ekle</div>
+              <div class="modal-sub">Tabloya yeni veri alanı ekle</div>
+            </div>
+            <button id="addFieldClose" class="xbtn" title="Kapat">×</button>
+          </div>
+      
+          <div class="modal-body">
+            <div class="formrow">
+              <div class="label">Kolon Adı</div>
+              <div class="row2" style="width: 100%;">
+                <input id="newFieldName" class="tb-input" type="text" placeholder="örn: nufus_yogunlugu" />
+              </div>
+            </div>
+      
+            <div class="formrow">
+              <div class="label">Veri Tipi</div>
+              <div class="row2" style="width: 100%;">
+                <select id="newFieldType" class="tb-select">
+                  <option value="string">Metin (String)</option>
+                  <option value="int">Tam Sayı (Integer)</option>
+                  <option value="float">Ondalıklı Sayı (Float)</option>
+                  <option value="bool">Mantıksal (Boolean)</option>
+                </select>
+              </div>
+            </div>
+      
+            <div class="formrow">
+              <div class="label">Varsayılan Değer</div>
+              <div class="row2" style="width: 100%;">
+                <input id="newFieldDef" class="tb-input" type="text" placeholder="Boş bırakılırsa varsayılan atanır" />
+              </div>
+            </div>
+            
+            <div class="hint" style="margin-top:0;">
+              Not: Kolon adındaki boşluklar otomatik olarak '_' ile değiştirilir.
+            </div>
+          </div>
+      
+          <div class="modal-foot">
+            <button id="createFieldConfirm" class="btn primary">Kolon Oluştur</button>
+          </div>
+        </div>
+      </div>
+
       <div id="attrDrawer" class="attr-drawer hidden">
         <div class="attr-head">
           <div class="attr-left">
@@ -219,19 +260,32 @@
             <select id="attrLayerSelect" class="attr-select"></select>
           </label>
 
-          <label class="attr-label">
-            Filtre:
-            <input id="attrFilter" class="attr-input" placeholder="Örn: name=Park veya sadece arama..." />
-          </label>
+          <div class="attr-spacer"></div>
 
-          <button id="attrClearFilter" class="btn ghost">Filtreyi Temizle</button>
-
+          <div class="filter-group">
+            <select id="attrFilterCol" class="attr-select" style="min-width:120px;">
+              <option value="">(Kolon Seç)</option>
+            </select>
+        
+            <select id="attrFilterOp" class="attr-select" style="width:90px; min-width:90px;">
+              <option value="contains">İçerir</option>
+              <option value="eq">Eşittir (=)</option>
+              <option value="gt">Büyüktür (&gt;)</option>
+              <option value="lt">Küçüktür (&lt;)</option>
+              <option value="gte">Büyük Eşit (&gt;=)</option>
+              <option value="lte">Küçük Eşit (&lt;=)</option>
+            </select>
+        
+            <input id="attrFilterVal" class="attr-input" placeholder="Değer..." style="min-width:100px; width:120px;" />
+        
+            <button id="attrApplyFilter" class="btn primary">Filtrele</button>
+            <button id="attrClearFilter" class="btn ghost">Temizle</button>
+          </div>
           <div class="attr-spacer"></div>
 
           <button id="attrAddField" class="btn ghost">Yeni Kolon</button>
           <button id="attrExportCsv" class="btn primary">Excel (CSV) İndir</button>
         </div>
-
         <div class="attr-tablewrap">
           <table class="attr-table" id="attrTable"></table>
         </div>
@@ -245,21 +299,33 @@
         </div>
       </div>
 
-      <!-- statusbar -->
+      <div id="legendBox" class="legend-box hidden">
+        <div class="legend-head">
+          <span class="legend-title">Lejant</span>
+          <button id="legendToggle" class="xbtn small" title="Küçült">_</button>
+        </div>
+        <div id="legendContent" class="legend-content"></div>
+      </div>
+
       <div class="statusbar" id="statusbar">Hazır</div>
+      <div id="coordBox" class="coord-box">
+        0.00000, 0.00000
+      </div>
+
+      <div id="contextMenu" class="ctx-menu hidden">
+        <div class="ctx-item" id="ctxZoom">🔍 Buraya Odaklan</div>
+        <div class="ctx-item" id="ctxCopy">📋 Koordinatı Kopyala</div>
+        <div class="ctx-item" id="ctxGoogle">🌏 Google Maps'te Aç</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-item" id="ctxCenter">📍 Merkezi Burası Yap</div>
+      </div>
     </main>
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- SHP import için shpjs -->
   <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
-
-  <!-- PROJ4 (TM30 -> WGS84 dönüşüm için) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.min.js"></script>
-
-  <!-- App JS (MODULE) -->
   <script type="module" src="./app.js"></script>
+
 </body>
 </html>
