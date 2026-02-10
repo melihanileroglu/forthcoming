@@ -105,12 +105,16 @@ body{
   grid-template-columns: 360px 1fr;
 }
 
-.sidebar{
-  border-right:1px solid var(--line);
-  background:var(--panel);
-  padding:14px;
-  overflow:auto;
-  position:relative;
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  padding: 14px;
+  position: relative;
+  
+  display: flex;
+  flex-direction: column;
+  height: 100vh;    
+  overflow: hidden; 
 }
 
 .brand{
@@ -159,13 +163,17 @@ body{
   box-shadow: 0 8px 22px rgba(37,99,235,0.12);
 }
 
-.panel{
-  display:none;
-  margin-top:12px;
-  padding:12px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--line);
+.panel {
+  display: none;
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
+
+  flex: 1;         
+  overflow-y: auto;  
+  min-height: 0;     
 }
 
 .panel.active{ display:block; }
@@ -791,15 +799,456 @@ body{
 }
 
 /* sidebar footer */
-.sidebar-foot{
-  position:sticky;
-  bottom:0;
-  background:transparent;
-  padding-top:12px;
-  display:flex;
-  gap:8px;
+.sidebar-foot {
+  padding-top: 12px;
+  display: flex;
+  gap: 8px;
+  
+  margin-top: auto;        
+  background: var(--panel); 
+  z-index: 10;            
+  flex-shrink: 0;           
+  border-top: 1px solid var(--line); 
 }
+
 
 /* küçük iyileştirme (isteğe bağlı) */
 .global-menu button span { display:flex; gap:8px; align-items:center; }
 .global-menu button small { opacity:0.75; }
+
+
+/* Tablo içi düzenleme inputu */
+.attr-edit-input {
+  width: 100%;
+  background: var(--bg);    
+  color: var(--text);       
+  border: 1px solid var(--primary2); 
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  outline: none;
+  box-shadow: 0 0 10px rgba(37,99,235,0.25);
+}
+
+
+
+.filter-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: rgba(255,255,255,0.02);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line);
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px !important;
+  line-height: 1.5;
+  font-family: inherit; 
+  min-width: 200px;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--muted) !important;
+  font-size: 18px !important;
+  padding: 4px 0 0 0 !important; 
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--danger) !important;
+}
+
+
+.popup-head {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.popup-title {
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.popup-layername {
+  font-size: 11px;
+  color: var(--primary2);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  border-bottom: 1px dashed rgba(255,255,255,0.05);
+  padding-bottom: 2px;
+}
+.popup-row:last-child { border-bottom: none; }
+
+.popup-label {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.popup-val {
+  color: var(--text);
+  font-weight: 700;
+  text-align: right;
+}
+
+/* ===== LEGEND (LEJANT) ===== */
+.legend-box {
+  position: absolute;
+  right: 14px;
+  bottom: 60px; /* Statusbar'ın üstünde */
+  width: 200px;
+  background: rgba(15, 26, 47, 0.95); /* Yarı saydam koyu mavi */
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.legend-box.hidden {
+  display: none;
+}
+
+.legend-box.collapsed {
+  height: 40px; /* Sadece başlık görünür */
+}
+
+.legend-head {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.legend-title {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-title::before {
+  content: "🗺️"; /* Küçük bir ikon */
+  font-size: 14px;
+}
+
+.legend-content {
+  padding: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Lejant Satırı */
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: background 0.2s;
+}
+.leg-item:hover {
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+}
+
+/* Sembol Kutusu */
+.leg-symbol {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.05); /* Arka fon */
+}
+
+/* Sembolün Kendisi (Dinamik CSS ile boyanacak) */
+.leg-icon {
+  display: block;
+}
+
+/* Nokta şekli */
+.leg-icon.point {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Çizgi şekli */
+.leg-icon.line {
+  width: 18px;
+  height: 0;
+  border-top-width: 2px;
+  border-top-style: solid;
+}
+
+/* Poligon şekli */
+.leg-icon.polygon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border-width: 2px;
+  border-style: solid;
+}
+
+/* Küçültme butonu ayarı */
+.xbtn.small {
+  width: 24px; height: 24px; font-size: 10px; line-height: 1;
+}
+/* ===== APP LAYOUT (GÜNCEL) ===== */
+.app {
+  height: 100vh;
+  display: grid;
+  /* Başlangıçta 360px, JS ile değişecek */
+  grid-template-columns: 360px 1fr; 
+  transition: grid-template-columns 0.3s ease; /* Yumuşak geçiş */
+}
+
+/* Sidebar Daraltıldığında Uygulanacak Sınıf */
+.app.sidebar-closed {
+  grid-template-columns: 0px 1fr !important;
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  padding: 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;    
+  overflow: hidden; 
+  /* Daralınca içindekiler taşmasın diye: */
+  min-width: 0; 
+  white-space: nowrap;
+}
+
+/* Toggle Butonu */
+#sidebarToggle {
+  position: absolute;
+  left: 360px; /* Panelin tam bittiği yer */
+  top: auto;
+  bottom: 50px;
+  width: 20px;
+  height: 40px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  z-index: 3000; /* En üstte */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-size: 10px;
+  transition: left 0.3s ease;
+}
+
+/* Sidebar kapandığında butonun yeni yeri */
+.app.sidebar-closed #sidebarToggle {
+  left: 0px; 
+}
+
+/* 2. ÖZNİTELİK TABLOSU (FLOATING WINDOW) */
+.attr-drawer {
+  /* Eski "bottom:14px" stilini eziyoruz */
+  position: fixed !important; 
+  left: 400px; /* Başlangıç konumu */
+  top: 100px;
+  bottom: auto !important;
+  right: auto !important;
+  
+  width: 600px;
+  height: 400px;
+  
+  /* Yeniden boyutlandırma (Resize) özelliği */
+  resize: both;
+  overflow: hidden; /* Resize tutamacının görünmesi için */
+  min-width: 400px;
+  min-height: 250px;
+  max-width: 95vw;
+  max-height: 90vh;
+  
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.attr-head {
+  cursor: grab; /* Tutulabilir olduğunu göster */
+  background: rgba(255,255,255,0.06);
+}
+.attr-head:active {
+  cursor: grabbing; /* Tutarken el sıkılsın */
+}
+
+/* İçerik tablosu resize durumunda düzgün çalışsın */
+.attr-tablewrap {
+  flex: 1;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================================
+   RESIZE (YENİDEN BOYUTLANDIRMA) STİLLERİ
+   ========================================= */
+
+/* Öznitelik tablosunun varsayılan resize özelliğini kapatıp bizimkini açıyoruz */
+.attr-drawer {
+  resize: none !important; /* Tarayıcının standart tutamacı kapansın */
+  min-width: 300px;        /* Çok küçülmesin */
+  min-height: 200px;
+  /* Taşmaları gizle ki köşe yuvarlaklığı bozulmasın, 
+     ama tutamaçları içeri (right:0, bottom:0) koyacağız */
+  overflow: hidden !important; 
+}
+
+/* Tutamaçların genel yapısı */
+.resizer {
+  position: absolute;
+  z-index: 2000; /* En üstte durmalı */
+  user-select: none;
+  touch-action: none;
+}
+
+/* SAĞ KENAR (Görünmez Şerit) */
+.resizer-r {
+  top: 0; bottom: 0; right: 0;
+  width: 6px;
+  cursor: col-resize; /* Mouse ikonu değişsin */
+  background: transparent;
+}
+.resizer-r:hover { background: rgba(147,197,253,0.1); } /* Üzerine gelince hafif mavi olsun */
+
+/* ALT KENAR (Görünmez Şerit) */
+.resizer-b {
+  bottom: 0; left: 0; right: 0;
+  height: 6px;
+  cursor: row-resize;
+  background: transparent;
+}
+.resizer-b:hover { background: rgba(147,197,253,0.1); }
+
+/* SAĞ ALT KÖŞE (Görünür Üçgen) */
+.resizer-br {
+  bottom: 0; right: 0;
+  width: 16px; height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, var(--primary2) 50%); /* Mavi üçgen */
+  opacity: 0.8;
+}
+.resizer-br:hover { opacity: 1; }
+
+/* =========================================
+   KOORDİNAT VE SAĞ TIK MENÜSÜ
+   ========================================= */
+
+/* 1. Canlı Koordinat Kutusu */
+.coord-box {
+  position: absolute;
+  right: 14px;
+  bottom: 14px; /* Status bar ile aynı hizada sağda */
+  background: rgba(15, 26, 47, 0.85); /* Yarı saydam koyu */
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-family: monospace; /* Sayılar hizalı dursun */
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 1000;
+  pointer-events: none; /* Mouse'u engellemesin */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* 2. Sağ Tık Menüsü (Context Menu) */
+.ctx-menu {
+  position: fixed; /* Harita içinde değil ekrana göre duralım */
+  width: 180px;
+  background: rgba(15, 26, 47, 0.98);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  z-index: 9999; /* Her şeyin üstünde */
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ctx-menu.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ctx-item {
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.ctx-item:hover {
+  background: rgba(37, 99, 235, 0.15); /* Hafif mavi hover */
+  color: #fff;
+}
+
+.ctx-sep {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 0;
+}
